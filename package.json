@@ -1,1 +1,28 @@
-{"name":"InstantoApp","version":"0.0.1","private":true,"scripts":{"start":"node node_modules/react-native/local-cli/cli.js start"},"dependencies":{"@react-navigation/native":"^7.1.20","@react-navigation/stack":"^7.6.4","react-native":"0.82.1","react-native-safe-area-context":"^5.6.2","react-native-screens":"^4.18.0"}}
+{
+  "name": "InstantoApp",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node node_modules/react-native/local-cli/cli.js start"
+  },
+  "dependencies": {
+    "@expo/metro-runtime": "~55.0.10",
+    "@react-navigation/bottom-tabs": "^7.15.11",
+    "@react-navigation/native": "^7.2.2",
+    "@react-navigation/stack": "^7.6.4",
+    "lucide-react-native": "^1.14.0",
+    "nativewind": "^4.2.3",
+    "react-dom": "19.2.0",
+    "react-native": "0.82.1",
+    "react-native-safe-area-context": "~5.6.2",
+    "react-native-screens": "~4.23.0",
+    "react-native-svg": "15.15.3",
+    "react-native-web": "^0.21.0",
+    "zustand": "^5.0.12"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.5.0",
+    "postcss": "^8.5.12",
+    "tailwindcss": "^3.4.19"
+  }
+}

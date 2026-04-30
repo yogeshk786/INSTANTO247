@@ -1,18 +1,19 @@
+// App.js
+import './global.css'; // <-- ADD THIS LINE
 import React from 'react';
+import { View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import HomeScreen from './src/screens/HomeScreen';
-import ServiceScreen from './src/screens/ServiceScreen';
-
-const Stack = createStackNavigator();
+import AppNavigator from './src/navigation/AppNavigator';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ title: "Instanto" }} />
-        <Stack.Screen name="ServiceScreen" component={ServiceScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <View style={{ flex: 1, backgroundColor: '#f8fafc' }}> 
+       <SafeAreaProvider>
+          <NavigationContainer>
+            <AppNavigator />
+          </NavigationContainer>
+       </SafeAreaProvider>
+    </View>
   );
 }
