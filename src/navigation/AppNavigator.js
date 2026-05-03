@@ -1,45 +1,58 @@
-// src/navigation/AppNavigator.js
-import React from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Platform, ActivityIndicator } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Home, History, CreditCard, ShoppingBag, User } from 'lucide-react-native';
 
+// Safe Area Insets for dynamic iOS/Android spacing
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+// --- Firebase Imports ---
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../config/firebase'; 
+
 // --- Real Screens ---
+import AuthScreen from '../screens/AuthScreen';
 import HomeScreen from '../screens/HomeScreen';
+import ServiceDetailScreen from '../screens/ServiceDetailScreen'; 
+import ActivityScreen from '../screens/ActivityScreen';
+import ProfileScreen from '../screens/ProfileScreen'; 
+import BookingOptionsScreen from '../screens/BookingOptionsScreen';
+import EditProfileScreen from '../screens/EditProfileScreen';
+
+// 🚨 1. TEMPORARILY DISABLED FOR SAFE MODE TEST 🚨
+import AddAddressScreen from '../screens/AddAddressScreen';
 
 // --- Temporary Placeholder Screens ---
-const ActivityScreen = () => <View style={styles.screen}><Text className="text-lg font-black text-slate-900">Activity Screen</Text></View>;
-const WalletScreen = () => <View style={styles.screen}><Text className="text-lg font-black text-slate-900">Wallet Screen</Text></View>;
-const StoreScreen = () => <View style={styles.screen}><Text className="text-lg font-black text-slate-900">Store Screen</Text></View>;
-const ProfileScreen = () => <View style={styles.screen}><Text className="text-lg font-black text-slate-900">Profile Screen</Text></View>;
+const WalletScreen = () => <View style={styles.screen}><Text style={styles.placeholderText}>Wallet Screen</Text></View>;
+const StoreScreen = () => <View style={styles.screen}><Text style={styles.placeholderText}>Store Screen</Text></View>;
 
 const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 
-export default function AppNavigator() {
+// 1. Your Custom Tab Navigator
+function TabNavigator() {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: true,
-        tabBarActiveTintColor: '#0f172a', // text-slate-900
-        tabBarInactiveTintColor: '#94a3b8', // text-slate-400
+        tabBarActiveTintColor: '#0f172a', // slate-900
+        tabBarInactiveTintColor: '#94a3b8', // slate-400
         tabBarStyle: {
-          position: 'absolute',
-          bottom: Platform.OS === 'ios' ? 24 : 16,
-          left: 16,
-          right: 16,
-          elevation: 10,
-          backgroundColor: '#0f172a', // bg-slate-900
-          borderRadius: 24,
-          height: 72,
-          paddingBottom: Platform.OS === 'ios' ? 20 : 10,
+          backgroundColor: '#0f172a',
+          height: Platform.OS === 'ios' ? 85 : 65 + insets.bottom,
+          paddingBottom: Platform.OS === 'ios' ? 24 : insets.bottom + 8,
           paddingTop: 10,
-          borderWidth: 1,
-          borderColor: 'rgba(255,255,255,0.1)',
+          borderTopWidth: 1,
+          borderTopColor: 'rgba(255,255,255,0.1)',
+          elevation: 10,
           shadowColor: '#000',
-          shadowOffset: { width: 0, height: 10 },
-          shadowOpacity: 0.3,
-          shadowRadius: 20,
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.1,
+          shadowRadius: 10,
         },
         tabBarLabelStyle: {
           fontSize: 10,
@@ -107,12 +120,62 @@ export default function AppNavigator() {
   );
 }
 
+// 2. The Master Navigator with Firebase State
+export default function AppNavigator() {
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setIsLoading(false); 
+    });
+
+    return unsubscribe; 
+  }, []);
+
+  if (isLoading) {
+    return (
+      <View style={styles.screen}>
+        <ActivityIndicator size="large" color="#f97316" />
+      </View>
+    );
+  }
+
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {user ? (
+        <>
+          {/* Main App Experience */}
+          <Stack.Screen name="MainTabs" component={TabNavigator} />
+          
+          {/* Full Page Overlays */}
+          <Stack.Screen name="ServiceDetail" component={ServiceDetailScreen} />
+          <Stack.Screen name="BookingOptions" component={BookingOptionsScreen} />
+          <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+          
+          {/* 🚨 2. TEMPORARILY DISABLED FOR SAFE MODE TEST 🚨 */}
+          <Stack.Screen name="AddAddress" component={AddAddressScreen} />
+        </>
+      ) : (
+        /* Unauthenticated Experience */
+        <Stack.Screen name="Auth" component={AuthScreen} />
+      )}
+    </Stack.Navigator>
+  );
+}
+
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: '#f8fafc',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  placeholderText: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#0f172a',
   },
   activeIcon: {
     backgroundColor: 'white',
@@ -122,7 +185,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 4,
-    // Web safe shadows
     ...Platform.select({
       web: { boxShadow: '0px 2px 4px rgba(0,0,0,0.1)' },
       default: {
